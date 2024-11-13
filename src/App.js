@@ -7,11 +7,10 @@ import './App.css';
 function Cube() {
   const meshRef = useRef();
 
-  // Utilisation de useFrame pour animer le cube
   useFrame(() => {
     if (meshRef.current) {
-      meshRef.current.rotation.x += 0.01; // Rotation sur l'axe X
-      meshRef.current.rotation.y += 0.01; // Rotation sur l'axe Y
+      meshRef.current.rotation.x += 0.01;
+      meshRef.current.rotation.y += 0.01;
     }
   });
 
@@ -24,6 +23,7 @@ function Cube() {
 }
 
 function App() {
+  const [authChoice, setAuthChoice] = useState('login'); // 'login' ou 'register'
   const [nom, setNom] = useState('');
   const [prenom, setPrenom] = useState('');
   const [race, setRace] = useState('');
@@ -35,12 +35,33 @@ function App() {
   const [motDePasse, setMotDePasse] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+
+  const handleAuthChoice = (choice) => {
+    setAuthChoice(choice);
+    setError('');
+    setSuccessMessage(''); // Réinitialiser le message de succès
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(''); // Réinitialiser l'erreur avant la soumission
+
+    // Afficher les données envoyées pour vérifier leur contenu
+    console.log({
+      nom,
+      prenom,
+      race,
+      classe,
+      date_du_perso: dateDuPerso,
+      rang,
+      divitée: divitee,
+      email,
+      mot_de_passe: motDePasse,
+    });
+
     try {
-      const response = await axios.post('http://localhost:5000/api/personnages', {
+      const response = await axios.post('http://localhost:3000/api/personnages', {
         nom,
         prenom,
         race,
@@ -52,7 +73,8 @@ function App() {
         mot_de_passe: motDePasse,
       });
       console.log('Personnage ajouté avec succès :', response.data);
-      // Réinitialisez les champs si nécessaire
+
+      // Réinitialiser les champs
       setNom('');
       setPrenom('');
       setRace('');
@@ -74,9 +96,19 @@ function App() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    // Implémentez votre logique d'authentification ici
-    // Exemple : vérifier si l'email et le mot de passe sont corrects
-    setIsLoggedIn(true); // Changez cela selon votre logique d'authentification
+    setError('');
+    setSuccessMessage(''); // Réinitialiser le message de succès
+
+    try {
+      const response = await axios.post('http://localhost:5000/api/login', {
+        email,
+        mot_de_passe: motDePasse,
+      });
+      setIsLoggedIn(true);
+      setSuccessMessage("Bravo! Vous êtes connecté.");  // Afficher le message de succès
+    } catch (error) {
+      setError('Identifiants incorrects.');
+    }
   };
 
   return (
@@ -85,66 +117,18 @@ function App() {
         <>
           <header className="App-header">
             <h1>3D Cube Showcase</h1>
-            {error && <p style={{ color: 'red' }}>{error}</p>} {/* Affichez l'erreur ici */}
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+            {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}  {/* Afficher le message de succès */}
             <form onSubmit={handleSubmit}>
-              <input 
-                type="text" 
-                placeholder="Nom" 
-                value={nom} 
-                onChange={(e) => setNom(e.target.value)} 
-                required 
-              />
-              <input 
-                type="text" 
-                placeholder="Prénom" 
-                value={prenom} 
-                onChange={(e) => setPrenom(e.target.value)} 
-                required 
-              />
-              <input 
-                type="text" 
-                placeholder="Race" 
-                value={race} 
-                onChange={(e) => setRace(e.target.value)} 
-              />
-              <input 
-                type="text" 
-                placeholder="Classe" 
-                value={classe} 
-                onChange={(e) => setClasse(e.target.value)} 
-              />
-              <input 
-                type="date" 
-                placeholder="Date du personnage" 
-                value={dateDuPerso} 
-                onChange={(e) => setDateDuPerso(e.target.value)} 
-              />
-              <input 
-                type="text" 
-                placeholder="Rang" 
-                value={rang} 
-                onChange={(e) => setRang(e.target.value)} 
-              />
-              <input 
-                type="text" 
-                placeholder="Divitée" 
-                value={divitee} 
-                onChange={(e) => setDivitee(e.target.value)} 
-              />
-              <input 
-                type="email" 
-                placeholder="Email" 
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)} 
-                required 
-              />
-              <input 
-                type="password" 
-                placeholder="Mot de passe" 
-                value={motDePasse} 
-                onChange={(e) => setMotDePasse(e.target.value)} 
-                required 
-              />
+              <input type="text" placeholder="Nom" value={nom} onChange={(e) => setNom(e.target.value)} required />
+              <input type="text" placeholder="Prénom" value={prenom} onChange={(e) => setPrenom(e.target.value)} required />
+              <input type="text" placeholder="Race" value={race} onChange={(e) => setRace(e.target.value)} />
+              <input type="text" placeholder="Classe" value={classe} onChange={(e) => setClasse(e.target.value)} />
+              <input type="date" placeholder="Date du personnage" value={dateDuPerso} onChange={(e) => setDateDuPerso(e.target.value)} />
+              <input type="text" placeholder="Rang" value={rang} onChange={(e) => setRang(e.target.value)} />
+              <input type="text" placeholder="Divitée" value={divitee} onChange={(e) => setDivitee(e.target.value)} />
+              <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <input type="password" placeholder="Mot de passe" value={motDePasse} onChange={(e) => setMotDePasse(e.target.value)} required />
               <button type="submit">Ajouter Personnage</button>
             </form>
           </header>
@@ -159,24 +143,28 @@ function App() {
         </>
       ) : (
         <header className="App-header">
-          <h1>Connexion</h1>
-          <form onSubmit={handleLogin}>
-            <input 
-              type="email" 
-              placeholder="Email" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-              required 
-            />
-            <input 
-              type="password" 
-              placeholder="Mot de passe" 
-              value={motDePasse} 
-              onChange={(e) => setMotDePasse(e.target.value)} 
-              required 
-            />
-            <button type="submit">Se connecter</button>
+          <h1>{authChoice === 'login' ? 'Connexion' : 'Inscription'}</h1>
+          <div>
+            <button onClick={() => handleAuthChoice('login')}>Connexion</button>
+            <button onClick={() => handleAuthChoice('register')}>Inscription</button>
+          </div>
+          <form onSubmit={authChoice === 'login' ? handleLogin : handleSubmit}>
+            {authChoice === 'register' && (
+              <>
+                <input type="text" placeholder="Nom" value={nom} onChange={(e) => setNom(e.target.value)} required />
+                <input type="text" placeholder="Prénom" value={prenom} onChange={(e) => setPrenom(e.target.value)} required />
+                <input type="text" placeholder="Race" value={race} onChange={(e) => setRace(e.target.value)} />
+                <input type="text" placeholder="Classe" value={classe} onChange={(e) => setClasse(e.target.value)} />
+                <input type="date" placeholder="Date du personnage" value={dateDuPerso} onChange={(e) => setDateDuPerso(e.target.value)} />
+                <input type="text" placeholder="Rang" value={rang} onChange={(e) => setRang(e.target.value)} />
+                <input type="text" placeholder="Divitée" value={divitee} onChange={(e) => setDivitee(e.target.value)} />
+              </>
+            )}
+            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <input type="password" placeholder="Mot de passe" value={motDePasse} onChange={(e) => setMotDePasse(e.target.value)} required />
+            <button type="submit">{authChoice === 'login' ? 'Se connecter' : 'S\'inscrire'}</button>
           </form>
+          {error && <p style={{ color: 'red' }}>{error}</p>}
         </header>
       )}
     </div>
