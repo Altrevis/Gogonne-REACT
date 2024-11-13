@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './FloatingCard.css';
 
-const FloatingCard = () => {
+const FloatingCard2 = () => {
   const [offset, setOffset] = useState(0);
-  const [mousePosition, setMousePosition] = useState({ x: 1.7, y: 1 });
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 1 });
 
-  // Animation de flottement
   useEffect(() => {
     let startTime = Date.now();
     let animationFrameId;
@@ -27,7 +26,6 @@ const FloatingCard = () => {
     };
   }, []);
 
-  // Gestion du parallaxe
   const handleMouseMove = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width - 0.1;
@@ -36,7 +34,7 @@ const FloatingCard = () => {
   };
 
   const handleMouseLeave = () => {
-    setMousePosition({ x: 1.7, y: 1 });
+    setMousePosition({ x: 0, y: 1 });
   };
 
   return (
@@ -70,4 +68,4 @@ const FloatingCard = () => {
   );
 };
 
-export default FloatingCard;
+export default FloatingCard2;

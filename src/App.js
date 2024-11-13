@@ -1,96 +1,70 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import FloatingCard from './FloatingCard'; // Import du composant FloatingCard
+import FloatingCard from './FloatingCard'; 
+import FloatingCard2 from './FloatingCard2';  
 import './App.css';
 
 function App() {
-  const [authChoice, setAuthChoice] = useState('login'); // 'login' ou 'register'
+  const [authChoice, setAuthChoice] = useState('login');
   const [nom, setNom] = useState('');
   const [prenom, setPrenom] = useState('');
-  const [race, setRace] = useState('');
-  const [classe, setClasse] = useState('');
-  const [dateDuPerso, setDateDuPerso] = useState('');
-  const [rang, setRang] = useState('');
-  const [divitee, setDivitee] = useState('');
   const [email, setEmail] = useState('');
   const [motDePasse, setMotDePasse] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [error, setError] = useState('');
-  const [, setSuccessMessage] = useState('');
+  const [scrollPosition, setScrollPosition] = useState(0);  // Position du scroll
 
   const handleAuthChoice = (choice) => {
     setAuthChoice(choice);
     setError('');
-    setSuccessMessage(''); // Réinitialiser le message de succès
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); // Réinitialiser l'erreur avant la soumission
-
-    // Afficher les données envoyées pour vérifier leur contenu
-    console.log({
-      nom,
-      prenom,
-      race,
-      classe,
-      date_du_perso: dateDuPerso,
-      rang,
-      divitée: divitee,
-      email,
-      mot_de_passe: motDePasse,
-    });
-
+    setError('');
     try {
       const response = await axios.post('http://localhost:3000/api/personnages', {
         nom,
         prenom,
-        race,
-        classe,
-        date_du_perso: dateDuPerso,
-        rang,
-        divitée: divitee,
         email,
         mot_de_passe: motDePasse,
       });
-      console.log('Personnage ajouté avec succès :', response.data);
-
-      // Réinitialiser les champs
       setNom('');
       setPrenom('');
-      setRace('');
-      setClasse('');
-      setDateDuPerso('');
-      setRang('');
-      setDivitee('');
       setEmail('');
       setMotDePasse('');
     } catch (error) {
-      if (error.response && error.response.data.error) {
-        setError(error.response.data.error); // Affichez l'erreur du serveur
-      } else {
-        setError('Erreur lors de l\'ajout du personnage.');
-      }
-      console.error('Erreur lors de l\'ajout du personnage:', error);
+      setError('Erreur lors de l\'ajout du personnage.');
     }
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
-    setSuccessMessage(''); // Réinitialiser le message de succès
-
     try {
       const response = await axios.post('http://localhost:3000/api/login', {
         email,
         mot_de_passe: motDePasse,
       });
       setIsLoggedIn(true);
-      setSuccessMessage("Bravo! Vous êtes connecté.");  // Afficher le message de succès
     } catch (error) {
       setError('Identifiants incorrects.');
     }
   };
+
+  // Gestion du défilement pour affecter la position des cartes
+  useEffect(() => {
+    const handleWheel = (e) => {
+      const scrollY = e.deltaY;
+      setScrollPosition((prevPosition) => Math.max(prevPosition + scrollY / 50, 0));  // Assurez-vous que la position ne devienne pas négative
+    };
+
+    window.addEventListener('wheel', handleWheel);
+
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+    };
+  }, []);  // L'effet ne sera exécuté qu'une seule fois lors du montage du composant
 
   return (
     <div className="App">
@@ -101,7 +75,52 @@ function App() {
             {error && <p style={{ color: 'red' }}>{error}</p>}
           </header>
           <section className="App-content">
-            <FloatingCard /> {/* Affichage de la carte flottante après connexion */}
+            {/* Cartes flottantes avec effet de défilement pour les déplacer vers le centre */}
+            <div
+              className="floating-card-container"
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                position: 'relative',
+                width: '100%',
+                height: '100vh',
+                perspective: '1000px',  // Ajout de la perspective pour l'effet de profondeur 3D
+                transformStyle: 'preserve-3d', // Nécessaire pour appliquer la 3D sur les éléments enfants
+              }}
+            >
+              {/* Cartes flottantes à gauche */}
+              {[...Array(6)].map((_, index) => (
+                <FloatingCard
+                  key={index}
+                  style={{
+                    position: 'absolute',
+                    left: `${(index % 2 === 0 ? 10 : 60)}%`, // Alternance entre gauche et droite
+                    top: `${20 * index}%`,
+                    zIndex: index + 1,  // Le zIndex augmente à chaque carte pour créer un effet de profondeur
+                    transform: `translateZ(${(scrollPosition * 10 + index * 100)}px)`,  // Effet de profondeur en 3D
+                    transition: 'transform 0.1s',
+                    willChange: 'transform',  // Optimisation des performances
+                  }}
+                />
+              ))}
+              
+              {/* Cartes flottantes à droite */}
+              {[...Array(6)].map((_, index) => (
+                <FloatingCard2
+                  key={index}
+                  style={{
+                    position: 'absolute',
+                    right: `${(index % 2 === 0 ? 10 : 60)}%`, // Alternance entre gauche et droite
+                    top: `${20 * index}%`,
+                    zIndex: index + 1,
+                    transform: `translateZ(${(scrollPosition * 10 + index * 100)}px)`,  // Effet de profondeur en 3D
+                    transition: 'transform 0.1s',
+                    willChange: 'transform',  // Optimisation des performances
+                  }}
+                />
+              ))}
+            </div>
           </section>
         </>
       ) : (
@@ -112,17 +131,6 @@ function App() {
             <button onClick={() => handleAuthChoice('register')}>Inscription</button>
           </div>
           <form onSubmit={authChoice === 'login' ? handleLogin : handleSubmit}>
-            {authChoice === 'register' && (
-              <>
-                <input type="text" placeholder="Nom" value={nom} onChange={(e) => setNom(e.target.value)} required />
-                <input type="text" placeholder="Prénom" value={prenom} onChange={(e) => setPrenom(e.target.value)} required />
-                <input type="text" placeholder="Race" value={race} onChange={(e) => setRace(e.target.value)} />
-                <input type="text" placeholder="Classe" value={classe} onChange={(e) => setClasse(e.target.value)} />
-                <input type="date" placeholder="Date du personnage" value={dateDuPerso} onChange={(e) => setDateDuPerso(e.target.value)} />
-                <input type="text" placeholder="Rang" value={rang} onChange={(e) => setRang(e.target.value)} />
-                <input type="text" placeholder="Divitée" value={divitee} onChange={(e) => setDivitee(e.target.value)} />
-              </>
-            )}
             <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
             <input type="password" placeholder="Mot de passe" value={motDePasse} onChange={(e) => setMotDePasse(e.target.value)} required />
             <button type="submit">{authChoice === 'login' ? 'Se connecter' : 'S\'inscrire'}</button>
