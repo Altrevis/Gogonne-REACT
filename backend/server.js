@@ -2,9 +2,11 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const sqlite3 = require('sqlite3').verbose();
+const bcrypt = require('bcrypt');  // Importer bcrypt pour le hachage des mots de passe
 
 const app = express();
 const port = 3000;
+const saltRounds = 10; // Nombre de tours pour le hachage du mot de passe
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -45,18 +47,25 @@ app.post('/api/personnages', (req, res) => {
       return res.status(400).json({ error: 'Un compte avec cet e-mail existe déjà.' });
     }
 
-    // Insertion dans la base de données
-    db.run(`INSERT INTO personnages (nom, prenom, race, classe, date_du_perso, rang, divitée, email, mot_de_passe) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
-    [nom, prenom, race, classe, date_du_perso, rang, divitée, email, mot_de_passe], function(err) {
+    // Hashage du mot de passe avant de l'enregistrer dans la base de données
+    bcrypt.hash(mot_de_passe, saltRounds, (err, hashedPassword) => {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
 
-      // Afficher "Bienvenue" dans le terminal
-      console.log(`Bienvenue ${nom} ${prenom}!`);
+      // Insertion dans la base de données avec le mot de passe haché
+      db.run(`INSERT INTO personnages (nom, prenom, race, classe, date_du_perso, rang, divitée, email, mot_de_passe) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
+      [nom, prenom, race, classe, date_du_perso, rang, divitée, email, hashedPassword], function(err) {
+        if (err) {
+          return res.status(500).json({ error: err.message });
+        }
 
-      // Retourner l'id du personnage ajouté
-      res.status(201).json({ id: this.lastID, nom, prenom });
+        // Afficher "Bienvenue" dans le terminal
+        console.log(`Bienvenue ${nom} ${prenom}!`);
+
+        // Retourner l'id du personnage ajouté
+        res.status(201).json({ id: this.lastID, nom, prenom });
+      });
     });
   });
 });
@@ -65,17 +74,29 @@ app.post('/api/personnages', (req, res) => {
 app.post('/api/login', (req, res) => {
   const { email, mot_de_passe } = req.body;
 
-  // Requête pour vérifier si l'utilisateur existe avec cet e-mail et mot de passe
-  db.get(`SELECT * FROM personnages WHERE email = ? AND mot_de_passe = ?`, [email, mot_de_passe], (err, row) => {
+  // Requête pour récupérer le personnage avec l'e-mail donné
+  db.get(`SELECT * FROM personnages WHERE email = ?`, [email], (err, row) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-    
+
     if (row) {
-      // Si les identifiants sont corrects, afficher un message de succès
-      return res.status(200).json({ message: 'Bravo' });
+      // Comparer le mot de passe envoyé avec celui stocké (haché)
+      bcrypt.compare(mot_de_passe, row.mot_de_passe, (err, result) => {
+        if (err) {
+          return res.status(500).json({ error: err.message });
+        }
+
+        if (result) {
+          // Si les mots de passe correspondent, afficher un message de succès
+          return res.status(200).json({ message: 'Bravo' });
+        } else {
+          // Si le mot de passe ne correspond pas
+          return res.status(400).json({ error: 'Identifiants incorrects.' });
+        }
+      });
     } else {
-      // Si l'utilisateur n'est pas trouvé, renvoyer un message d'erreur
+      // Si l'utilisateur n'est pas trouvé
       return res.status(400).json({ error: 'Identifiants incorrects.' });
     }
   });
