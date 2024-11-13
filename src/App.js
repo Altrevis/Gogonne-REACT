@@ -1,26 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import FloatingCard from './FloatingCard'; // Import du composant FloatingCard
 import './App.css';
-
-function Cube() {
-  const meshRef = useRef();
-
-  useFrame(() => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x += 0.01;
-      meshRef.current.rotation.y += 0.01;
-    }
-  });
-
-  return (
-    <mesh ref={meshRef}>
-      <boxGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial color="brown" />
-    </mesh>
-  );
-}
 
 function App() {
   const [authChoice, setAuthChoice] = useState('login'); // 'login' ou 'register'
@@ -35,7 +16,7 @@ function App() {
   const [motDePasse, setMotDePasse] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  const [, setSuccessMessage] = useState('');
 
   const handleAuthChoice = (choice) => {
     setAuthChoice(choice);
@@ -116,16 +97,11 @@ function App() {
       {isLoggedIn ? (
         <>
           <header className="App-header">
-            <h1>3D Cube Showcase</h1>
+            <h1>Bienvenue !</h1>
             {error && <p style={{ color: 'red' }}>{error}</p>}
           </header>
           <section className="App-content">
-            <Canvas>
-              <ambientLight />
-              <pointLight position={[10, 10, 10]} />
-              <Cube />
-              <OrbitControls enableZoom={true} />
-            </Canvas>
+            <FloatingCard /> {/* Affichage de la carte flottante après connexion */}
           </section>
         </>
       ) : (
