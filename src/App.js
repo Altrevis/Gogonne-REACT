@@ -118,19 +118,6 @@ function App() {
           <header className="App-header">
             <h1>3D Cube Showcase</h1>
             {error && <p style={{ color: 'red' }}>{error}</p>}
-            {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}  {/* Afficher le message de succès */}
-            <form onSubmit={handleSubmit}>
-              <input type="text" placeholder="Nom" value={nom} onChange={(e) => setNom(e.target.value)} required />
-              <input type="text" placeholder="Prénom" value={prenom} onChange={(e) => setPrenom(e.target.value)} required />
-              <input type="text" placeholder="Race" value={race} onChange={(e) => setRace(e.target.value)} />
-              <input type="text" placeholder="Classe" value={classe} onChange={(e) => setClasse(e.target.value)} />
-              <input type="date" placeholder="Date du personnage" value={dateDuPerso} onChange={(e) => setDateDuPerso(e.target.value)} />
-              <input type="text" placeholder="Rang" value={rang} onChange={(e) => setRang(e.target.value)} />
-              <input type="text" placeholder="Divitée" value={divitee} onChange={(e) => setDivitee(e.target.value)} />
-              <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-              <input type="password" placeholder="Mot de passe" value={motDePasse} onChange={(e) => setMotDePasse(e.target.value)} required />
-              <button type="submit">Ajouter Personnage</button>
-            </form>
           </header>
           <section className="App-content">
             <Canvas>
