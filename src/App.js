@@ -6,32 +6,33 @@ import './App.css';
 
 function App() {
   // États pour l'inscription
-  const [authChoice, setAuthChoice] = useState('login');
-  const [nom, setNom] = useState('');
-  const [prenom, setPrenom] = useState('');
-  const [email, setEmail] = useState('');
-  const [motDePasse, setMotDePasse] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [error, setError] = useState('');
-  const [scrollPosition, setScrollPosition] = useState(0);
+  const [authChoice, setAuthChoice] = useState('login'); // Choix entre login et inscription
+  const [nom, setNom] = useState(''); // État pour le nom de l'utilisateur
+  const [prenom, setPrenom] = useState(''); // État pour le prénom de l'utilisateur
+  const [email, setEmail] = useState(''); // État pour l'email
+  const [motDePasse, setMotDePasse] = useState(''); // État pour le mot de passe
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // État pour vérifier si l'utilisateur est connecté
+  const [error, setError] = useState(''); // État pour gérer les messages d'erreur
+  const [scrollPosition, setScrollPosition] = useState(0); // État pour la position du scroll
 
   // États pour les menus déroulants
-  const [race, setRace] = useState('');
-  const [classe, setClasse] = useState('');
-  const [rang, setRang] = useState('');
-  const [divitee, setDivitee] = useState('');
+  const [race, setRace] = useState(''); // État pour la race
+  const [classe, setClasse] = useState(''); // État pour la classe
+  const [rang, setRang] = useState(''); // État pour le rang
+  const [divitee, setDivitee] = useState(''); // État pour la divinité
 
   // Fonction pour gérer les choix entre login/inscription
   const handleAuthChoice = (choice) => {
-    setAuthChoice(choice);
-    setError('');
+    setAuthChoice(choice); // Change le choix entre login et inscription
+    setError(''); // Réinitialise les erreurs
   };
 
   // Fonction pour envoyer l'inscription au serveur
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
+    e.preventDefault(); // Empêche le comportement par défaut du formulaire
+    setError(''); // Réinitialise les erreurs
     try {
+      // Envoie les données d'inscription au serveur
       await axios.post('http://localhost:3000/api/personnages', {
         nom,
         prenom,
@@ -42,6 +43,7 @@ function App() {
         rang,
         divitée: divitee,
       });
+      // Réinitialise les champs après inscription réussie
       setNom('');
       setPrenom('');
       setEmail('');
@@ -51,46 +53,50 @@ function App() {
       setRang('');
       setDivitee('');
     } catch (error) {
-      setError('Erreur lors de l\'ajout du personnage.');
+      setError('Erreur lors de l\'ajout du personnage.'); // Gère les erreurs d'inscription
     }
   };
 
   // Fonction pour gérer la connexion
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
+    e.preventDefault(); // Empêche le comportement par défaut du formulaire
+    setError(''); // Réinitialise les erreurs
     try {
+      // Envoie les données de connexion au serveur
       await axios.post('http://localhost:3000/api/login', {
         email,
         mot_de_passe: motDePasse,
       });
-      setIsLoggedIn(true);
+      setIsLoggedIn(true); // Met l'état isLoggedIn à true si la connexion est réussie
     } catch (error) {
-      setError('Identifiants incorrects.');
+      setError('Identifiants incorrects.'); // Affiche une erreur si la connexion échoue
     }
   };
 
   useEffect(() => {
+    // Fonction pour gérer le défilement de la page (scroll)
     const handleWheel = (e) => {
-      const scrollY = e.deltaY;
-      setScrollPosition((prevPosition) => Math.max(prevPosition + scrollY / 50, 0));
+      const scrollY = e.deltaY; // Récupère la valeur du défilement
+      setScrollPosition((prevPosition) => Math.max(prevPosition + scrollY / 50, 0)); // Met à jour la position du scroll
     };
 
-    window.addEventListener('wheel', handleWheel);
+    window.addEventListener('wheel', handleWheel); // Écoute l'événement de scroll
     return () => {
-      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('wheel', handleWheel); // Nettoie l'événement lorsque le composant est démonté
     };
   }, []);
 
   return (
     <div className="App">
+      {/* Affiche le contenu après connexion */}
       {isLoggedIn ? (
         <>
           <header className="App-header">
             <h1>Bienvenue !</h1>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+            {error && <p style={{ color: 'red' }}>{error}</p>} {/* Affiche les erreurs */}
           </header>
           <section className="App-content">
+            {/* Section avec les cartes flottantes */}
             <div
               className="floating-card-container"
               style={{
@@ -104,6 +110,7 @@ function App() {
                 transformStyle: 'preserve-3d',
               }}
             >
+              {/* Génère des cartes flottantes avec une position basée sur la scrollPosition */}
               {[...Array(6)].map((_, index) => (
                 <FloatingCard
                   key={index}
@@ -136,9 +143,11 @@ function App() {
           </section>
         </>
       ) : (
+        // Affiche le formulaire de connexion/inscription
         <header className="App-header">
           <h1>{authChoice === 'login' ? 'Connexion' : 'Inscription'}</h1>
           <div>
+            {/* Boutons pour choisir entre connexion et inscription */}
             <button onClick={() => handleAuthChoice('login')}>Connexion</button>
             <button onClick={() => handleAuthChoice('register')}>Inscription</button>
           </div>
@@ -193,7 +202,7 @@ function App() {
             <button type="submit">
               {authChoice === 'login' ? 'Se connecter' : 'S\'inscrire'}
             </button>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+            {error && <p style={{ color: 'red' }}>{error}</p>} {/* Affiche les erreurs */}
           </form>
         </header>
       )}
