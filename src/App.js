@@ -5,124 +5,125 @@ import FloatingCard2 from './FloatingCard2';
 import './App.css';
 
 function App() {
-  // Déclaration des états nécessaires
-  const [authChoice, setAuthChoice] = useState('login'); // Choix entre inscription et connexion
-  const [nom, setNom] = useState(''); // Nom de l'utilisateur
-  const [prenom, setPrenom] = useState(''); // Prénom de l'utilisateur
-  const [email, setEmail] = useState(''); // Email de l'utilisateur
-  const [motDePasse, setMotDePasse] = useState(''); // Mot de passe de l'utilisateur
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Statut de connexion
-  const [error, setError] = useState(''); // Message d'erreur
-  const [scrollPosition, setScrollPosition] = useState(0); // Position du scroll
+  // États pour l'inscription
+  const [authChoice, setAuthChoice] = useState('login');
+  const [nom, setNom] = useState('');
+  const [prenom, setPrenom] = useState('');
+  const [email, setEmail] = useState('');
+  const [motDePasse, setMotDePasse] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [error, setError] = useState('');
+  const [scrollPosition, setScrollPosition] = useState(0);
 
-  // Fonction pour gérer le choix de connexion ou d'inscription
+  // États pour les menus déroulants
+  const [race, setRace] = useState('');
+  const [classe, setClasse] = useState('');
+  const [rang, setRang] = useState('');
+  const [divitee, setDivitee] = useState('');
+
+  // Fonction pour gérer les choix entre login/inscription
   const handleAuthChoice = (choice) => {
-    setAuthChoice(choice); // Met à jour le choix d'authentification
-    setError(''); // Réinitialise le message d'erreur
+    setAuthChoice(choice);
+    setError('');
   };
 
-  // Fonction pour envoyer l'inscription
+  // Fonction pour envoyer l'inscription au serveur
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Empêche le rechargement de la page
-    setError(''); // Réinitialise l'erreur
+    e.preventDefault();
+    setError('');
     try {
-      // Envoi des données d'inscription au serveur
       await axios.post('http://localhost:3000/api/personnages', {
         nom,
         prenom,
         email,
         mot_de_passe: motDePasse,
+        race,
+        classe,
+        rang,
+        divitée: divitee,
       });
-      // Réinitialisation des champs après soumission
       setNom('');
       setPrenom('');
       setEmail('');
       setMotDePasse('');
+      setRace('');
+      setClasse('');
+      setRang('');
+      setDivitee('');
     } catch (error) {
-      setError('Erreur lors de l\'ajout du personnage.'); // Affiche une erreur si l'envoi échoue
+      setError('Erreur lors de l\'ajout du personnage.');
     }
   };
 
   // Fonction pour gérer la connexion
   const handleLogin = async (e) => {
-    e.preventDefault(); // Empêche le rechargement de la page
-    setError(''); // Réinitialise l'erreur
+    e.preventDefault();
+    setError('');
     try {
-      // Envoi des données de connexion au serveur
       await axios.post('http://localhost:3000/api/login', {
         email,
         mot_de_passe: motDePasse,
       });
-      setIsLoggedIn(true); // Change l'état de connexion en 'true'
+      setIsLoggedIn(true);
     } catch (error) {
-      setError('Identifiants incorrects.'); // Affiche une erreur si les identifiants sont incorrects
+      setError('Identifiants incorrects.');
     }
   };
 
-  // Effet de gestion du défilement pour affecter la position des cartes flottantes
   useEffect(() => {
-    // Fonction pour capturer l'événement de défilement de la souris
     const handleWheel = (e) => {
-      const scrollY = e.deltaY; // Récupère le mouvement de la souris
-      // Mise à jour de la position de défilement, ne devient pas négatif
+      const scrollY = e.deltaY;
       setScrollPosition((prevPosition) => Math.max(prevPosition + scrollY / 50, 0));
     };
 
-    // Ajout d'un écouteur d'événements pour le défilement
     window.addEventListener('wheel', handleWheel);
-
-    // Nettoyage de l'écouteur d'événements lors du démontage du composant
     return () => {
       window.removeEventListener('wheel', handleWheel);
     };
-  }, []); // L'effet s'exécute une seule fois lors du montage du composant
+  }, []);
 
   return (
     <div className="App">
       {isLoggedIn ? (
-        // Si l'utilisateur est connecté, on affiche la page d'accueil
         <>
           <header className="App-header">
             <h1>Bienvenue !</h1>
-            {/* Affichage du message d'erreur s'il y en a un */}
             {error && <p style={{ color: 'red' }}>{error}</p>}
           </header>
           <section className="App-content">
             <div
               className="floating-card-container"
               style={{
-                display: 'flex', // Utilisation de flexbox pour centrer les cartes
+                display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
-                position: 'relative', // Positionnement relatif des cartes
+                position: 'relative',
                 width: '100%',
-                height: '100vh', // Hauteur de la section à 100% de la vue
-                perspective: '1000px',  // Perspective 3D pour l'effet de profondeur
-                transformStyle: 'preserve-3d', // Nécessaire pour appliquer la 3D sur les enfants
+                height: '100vh',
+                perspective: '1000px',
+                transformStyle: 'preserve-3d',
               }}
             >
-              {/* Génère des cartes flottantes à gauche */}
               {[...Array(6)].map((_, index) => (
                 <FloatingCard
                   key={index}
                   style={{
                     position: 'absolute',
-                    left: `${(index % 2 === 0 ? 10 : 60)}%`, // Positionnement alterné à gauche et droite
-                    top: `${20 * index}%`, // Décalage vertical des cartes
-                    zIndex: index + 1, // Augmente l'index Z pour la superposition
-                    transform: `translateZ(${(scrollPosition * 10 + index * 100)}px)`, // Applique l'effet de profondeur basé sur le défilement
-                    transition: 'transform 0.1s', // Transition douce pour l'effet de profondeur
-                    willChange: 'transform',  // Optimisation des performances
+                    left: `${(index % 2 === 0 ? 10 : 60)}%`,
+                    top: `${20 * index}%`,
+                    zIndex: index + 1,
+                    transform: `translateZ(${(scrollPosition * 10 + index * 100)}px)`,
+                    transition: 'transform 0.1s',
+                    willChange: 'transform',
                   }}
                 />
               ))}
-              {/* Génère des cartes flottantes à droite */}
               {[...Array(6)].map((_, index) => (
                 <FloatingCard2
                   key={index}
                   style={{
                     position: 'absolute',
-                    right: `${(index % 2 === 0 ? 10 : 60)}%`, // Positionnement alterné à gauche et droite
+                    right: `${(index % 2 === 0 ? 10 : 60)}%`,
                     top: `${20 * index}%`,
                     zIndex: index + 1,
                     transform: `translateZ(${(scrollPosition * 10 + index * 100)}px)`,
@@ -135,40 +136,65 @@ function App() {
           </section>
         </>
       ) : (
-        // Si l'utilisateur n'est pas connecté, on affiche le formulaire de connexion ou d'inscription
         <header className="App-header">
           <h1>{authChoice === 'login' ? 'Connexion' : 'Inscription'}</h1>
           <div>
-            {/* Boutons pour basculer entre la connexion et l'inscription */}
             <button onClick={() => handleAuthChoice('login')}>Connexion</button>
             <button onClick={() => handleAuthChoice('register')}>Inscription</button>
           </div>
-          {/* Formulaire d'authentification */}
           <form onSubmit={authChoice === 'login' ? handleLogin : handleSubmit}>
-            {/* Champs de saisie pour l'email */}
-            <label htmlFor="email">Email</label>
             <input
               id="email"
               type="email"
               placeholder="Email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)} // Met à jour l'email
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
-            {/* Champs de saisie pour le mot de passe */}
-            <label htmlFor="password">Mot de passe</label>
             <input
               id="password"
               type="password"
               placeholder="Mot de passe"
               value={motDePasse}
-              onChange={(e) => setMotDePasse(e.target.value)} // Met à jour le mot de passe
+              onChange={(e) => setMotDePasse(e.target.value)}
               required
             />
-            <button type="submit">{authChoice === 'login' ? 'Se connecter' : 'S\'inscrire'}</button>
+
+            {/* Menus déroulants pour l'inscription uniquement */}
+            {authChoice === 'register' && (
+              <>
+                <select value={race} onChange={(e) => setRace(e.target.value)} required>
+                  <option value="">Choisir une race</option>
+                  <option value="1">Race 1</option>
+                  <option value="2">Race 2</option>
+                  <option value="3">Race 3</option>
+                </select>
+                <select value={classe} onChange={(e) => setClasse(e.target.value)} required>
+                  <option value="">Choisir une classe</option>
+                  <option value="1">Classe 1</option>
+                  <option value="2">Classe 2</option>
+                  <option value="3">Classe 3</option>
+                </select>
+                <select value={rang} onChange={(e) => setRang(e.target.value)} required>
+                  <option value="">Choisir un rang</option>
+                  <option value="1">Rang 1</option>
+                  <option value="2">Rang 2</option>
+                  <option value="3">Rang 3</option>
+                </select>
+                <select value={divitee} onChange={(e) => setDivitee(e.target.value)} required>
+                  <option value="">Choisir une divinité</option>
+                  <option value="1">Divinité 1</option>
+                  <option value="2">Divinité 2</option>
+                  <option value="3">Divinité 3</option>
+                </select>
+              </>
+            )}
+
+            <button type="submit">
+              {authChoice === 'login' ? 'Se connecter' : 'S\'inscrire'}
+            </button>
+            {error && <p style={{ color: 'red' }}>{error}</p>}
           </form>
-          {/* Affichage du message d'erreur si nécessaire */}
-          {error && <p style={{ color: 'red' }}>{error}</p>}
         </header>
       )}
     </div>

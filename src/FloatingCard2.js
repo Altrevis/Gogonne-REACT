@@ -1,49 +1,46 @@
-// Importation des modules nécessaires depuis React
 import React, { useState, useEffect } from 'react';
 import './FloatingCard.css';
 
 const FloatingCard2 = () => {
-  // Déclaration des états : un pour l'offset de l'animation et un autre pour la position de la souris
+  // Déclare les états pour le décalage de la carte et la position de la souris
   const [offset, setOffset] = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 1 });
 
-  // Hook useEffect pour l'animation de flottement
   useEffect(() => {
-    // Initialiser l'heure de départ
+    // Initialisation du temps de départ pour l'animation
     let startTime = Date.now();
     let animationFrameId;
 
-    // Fonction d'animation qui modifie l'offset pour créer un effet de flottement
+    // Fonction d'animation pour le mouvement de la carte
     const animate = () => {
       const currentTime = Date.now();
       const elapsed = (currentTime - startTime) / 1000; // Temps écoulé en secondes
-      const newOffset = Math.sin(elapsed * 2) * 8; // Appliquer un mouvement sinusoïdal
-      setOffset(newOffset); // Mettre à jour l'offset avec la nouvelle valeur
-      animationFrameId = requestAnimationFrame(animate); // Appeler animate de manière récursive pour continuer l'animation
+      const newOffset = Math.sin(elapsed * 2) * 8; // Calcul de l'offset sinusoïdal
+      setOffset(newOffset); // Mise à jour de l'offset
+      animationFrameId = requestAnimationFrame(animate); // Appel récursif de l'animation
     };
 
-    animate(); // Démarrer l'animation
+    animate(); // Démarre l'animation
 
-    // Nettoyage de l'animation lorsque le composant est démonté
+    // Cleanup pour annuler l'animation lorsque le composant est démonté
     return () => {
       if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId); // Annuler l'animation pour éviter les fuites de mémoire
+        cancelAnimationFrame(animationFrameId);
       }
     };
-  }, []); // Le tableau vide [] garantit que ce hook ne sera exécuté qu'une seule fois lors du montage du composant
+  }, []); // Effet exécuté une seule fois lors du montage du composant
 
-  // Fonction pour gérer le déplacement de la souris sur la carte
+  // Gère le mouvement de la souris pour ajuster la position de la carte
   const handleMouseMove = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect(); // Obtenir les dimensions de l'élément
-    // Calculer la position relative de la souris par rapport à l'élément
-    const x = (e.clientX - rect.left) / rect.width - 0.1; 
-    const y = (e.clientY - rect.top) / rect.height - 1.5;
-    setMousePosition({ x, y }); // Mettre à jour la position de la souris
+    const rect = e.currentTarget.getBoundingClientRect(); // Récupère les coordonnées du conteneur
+    const x = (e.clientX - rect.left) / rect.width - 0.1; // Position horizontale de la souris
+    const y = (e.clientY - rect.top) / rect.height - 1.5; // Position verticale de la souris
+    setMousePosition({ x, y }); // Mise à jour de la position de la souris
   };
 
-  // Réinitialiser la position de la souris lorsque celle-ci quitte la carte
+  // Réinitialise la position de la souris lorsque la souris quitte la carte
   const handleMouseLeave = () => {
-    setMousePosition({ x: 0, y: 1 });
+    setMousePosition({ x: 0, y: 1 }); // Réinitialisation de la position de la souris
   };
 
   return (
@@ -52,17 +49,15 @@ const FloatingCard2 = () => {
         className="card"
         style={{
           transform: `
-            translateY(${offset}px) // Flottement vertical
-            rotateX(${15 - mousePosition.y * 20}deg) // Rotation horizontale en fonction de Y
-            rotateY(${-15 + mousePosition.x * 20}deg) // Rotation verticale en fonction de X
-            perspective(1000px) // Perspective pour un effet 3D
+            translateY(${offset}px)  /* Déplacement vertical de la carte */
+            rotateX(${15 - mousePosition.y * 20}deg)  /* Rotation sur l'axe X basée sur la position de la souris */
+            rotateY(${-15 + mousePosition.x * 20}deg)  /* Rotation sur l'axe Y basée sur la position de la souris */
+            perspective(1000px)  /* Applique la perspective 3D */
           `,
-          transformStyle: 'preserve-3d' // Préserver la 3D pour l'élément
+          transformStyle: 'preserve-3d' // Préserve les transformations 3D
         }}
       >
-        {/* Arrière-plan de la carte */}
         <div className="card-background" />
-        {/* Contenu de la carte */}
         <div className="card-content">
           <div className="left-column">
             <h2 className="text-2xl font-bold text-blue-800">Titre Principal</h2>
@@ -70,14 +65,13 @@ const FloatingCard2 = () => {
             <p className="text-sm text-blue-500">Informations complémentaires...</p>
           </div>
           <div className="right-column">
-            <img src="/api/placeholder/400/320" alt="placeholder" /> {/* Image de l'élément */}
+            <img src="/api/placeholder/400/320" alt="placeholder" />
           </div>
         </div>
-        {/* Réflexion sur la carte lorsqu'elle est survolée */}
         <div className="card-hover-reflection" />
       </div>
     </div>
   );
 };
 
-export default FloatingCard2;
+export default FloatingCard2;  // Export du composant pour l'utiliser ailleurs
