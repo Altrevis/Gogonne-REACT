@@ -23,7 +23,7 @@ function App() {
     e.preventDefault();
     setError('');
     try {
-      const response = await axios.post('http://localhost:3000/api/personnages', {
+      await axios.post('http://localhost:3000/api/personnages', {
         nom,
         prenom,
         email,
@@ -37,12 +37,12 @@ function App() {
       setError('Erreur lors de l\'ajout du personnage.');
     }
   };
-
+  
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     try {
-      const response = await axios.post('http://localhost:3000/api/login', {
+      await axios.post('http://localhost:3000/api/login', {
         email,
         mot_de_passe: motDePasse,
       });
