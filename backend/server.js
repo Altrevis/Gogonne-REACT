@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const sqlite3 = require('sqlite3').verbose();
-const bcrypt = require('bcrypt');  // Importer bcrypt pour le hachage des mots de passe
+const bcrypt = require('bcrypt'); // Importer bcrypt pour le hachage des mots de passe
 
 const app = express();
 const port = 3000;
@@ -99,6 +99,20 @@ app.post('/api/login', (req, res) => {
       // Si l'utilisateur n'est pas trouvé
       return res.status(400).json({ error: 'Identifiants incorrects.' });
     }
+  });
+});
+
+// Route pour récupérer les personnages sans mot de passe et ID
+app.get('/api/personnages', (req, res) => {
+  db.all(`SELECT nom, prenom, race, classe, date_du_perso, rang, divitée, email FROM personnages`, [], (err, rows) => {
+    if (err) {
+      console.error('Erreur SQL:', err.message); // Vérifie les erreurs SQL dans la console
+      return res.status(500).json({ error: err.message });
+    }
+    
+    console.log('Données récupérées:', rows); // Affiche les données dans la console pour vérification
+    
+    res.status(200).json(rows);
   });
 });
 

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import './FloatingCard.css';
 
 const FloatingCard = () => {
+  const [personnages, setPersonnages] = useState([]);
   const [offset, setOffset] = useState(0);
-  const [mousePosition, setMousePosition] = useState({ x: 1.7, y: 1 });
 
   // Animation de flottement
   useEffect(() => {
@@ -27,45 +27,31 @@ const FloatingCard = () => {
     };
   }, []);
 
-  // Gestion du parallaxe
-  const handleMouseMove = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.1;
-    const y = (e.clientY - rect.top) / rect.height - 1.5;
-    setMousePosition({ x, y });
-  };
-
-  const handleMouseLeave = () => {
-    setMousePosition({ x: 1.7, y: 1 });
-  };
+  // Récupération des personnages
+  useEffect(() => {
+    fetch('http://localhost:3000/api/personnages')
+      .then((response) => response.json())
+      .then((data) => setPersonnages(data))
+      .catch((error) => console.error('Erreur :', error));
+  }, []);
 
   return (
-    <div className="floating-card-container" onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}>
-      <div 
-        className="card"
-        style={{
-          transform: `
-            translateY(${offset}px)
-            rotateX(${15 - mousePosition.y * 20}deg)
-            rotateY(${-15 + mousePosition.x * 20}deg)
-            perspective(1000px)
-          `,
-          transformStyle: 'preserve-3d'
-        }}
-      >
-        <div className="card-background" />
-        <div className="card-content">
-          <div className="left-column">
-            <h2 className="text-2xl font-bold text-blue-800">Titre Principal</h2>
-            <p className="text-lg text-blue-600">Description détaillée du contenu...</p>
-            <p className="text-sm text-blue-500">Informations complémentaires...</p>
-          </div>
-          <div className="right-column">
-            <img src="/api/placeholder/400/320" alt="placeholder" />
-          </div>
+    <div className="cards-container">
+      {personnages.map((personnage, index) => (
+        <div
+          key={index}
+          className="floating-card"
+          style={{ transform: `translateY(${offset}px)` }}
+        >
+          <h3>{personnage.nom} {personnage.prenom}</h3>
+          <p><strong>Race:</strong> {personnage.race}</p>
+          <p><strong>Classe:</strong> {personnage.classe}</p>
+          <p><strong>Date de création:</strong> {personnage.date_du_perso}</p>
+          <p><strong>Rang:</strong> {personnage.rang}</p>
+          <p><strong>Divinité:</strong> {personnage.divitée}</p>
+          <p><strong>Email:</strong> {personnage.email}</p>
         </div>
-        <div className="card-hover-reflection" />
-      </div>
+      ))}
     </div>
   );
 };
