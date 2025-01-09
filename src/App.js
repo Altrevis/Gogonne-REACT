@@ -20,6 +20,7 @@ function App() {
   const [classe, setClasse] = useState(''); // Sélection de la classe
   const [rang, setRang] = useState(''); // Sélection du rang
   const [divitee, setDivitee] = useState(''); // Sélection de la divinité
+  const [date_du_perso, setDate_du_perso] = useState(''); // Ajout de l'état pour la date du personnage
 
   // Modifie le choix d'authentification entre connexion et inscription
   const handleAuthChoice = (choice) => {
@@ -36,6 +37,7 @@ function App() {
       await axios.post('http://localhost:3000/api/personnages', {
         nom,
         prenom,
+        date_du_perso,
         email,
         mot_de_passe: motDePasse,
         race,
@@ -47,6 +49,7 @@ function App() {
       // Réinitialise les champs après une inscription réussie
       setNom('');
       setPrenom('');
+      setDate_du_perso(''); // Réinitialise la date du personnage
       setEmail('');
       setMotDePasse('');
       setRace('');
@@ -190,6 +193,14 @@ function App() {
                   placeholder="Prénom"
                   value={prenom}
                   onChange={(e) => setPrenom(e.target.value)}
+                  required
+                />
+                <input
+                  id="Date"
+                  type="text"
+                  placeholder="Date"
+                  value={date_du_perso}
+                  onChange={(e) => setDate_du_perso(e.target.value)}
                   required
                 />
                 <select value={race} onChange={(e) => setRace(e.target.value)} required>
