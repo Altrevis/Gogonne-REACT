@@ -5,34 +5,34 @@ import FloatingCard2 from './FloatingCard2';
 import './App.css';
 
 function App() {
-  // États pour l'inscription
-  const [authChoice, setAuthChoice] = useState('login'); // Choix entre login et inscription
+  // États pour l'authentification et les données utilisateur
+  const [authChoice, setAuthChoice] = useState('login'); // Détermine si l'utilisateur choisit de se connecter ou de s'inscrire
   const [nom, setNom] = useState(''); // État pour le nom de l'utilisateur
   const [prenom, setPrenom] = useState(''); // État pour le prénom de l'utilisateur
-  const [email, setEmail] = useState(''); // État pour l'email
+  const [email, setEmail] = useState(''); // État pour l'email de l'utilisateur
   const [motDePasse, setMotDePasse] = useState(''); // État pour le mot de passe
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // État pour vérifier si l'utilisateur est connecté
-  const [error, setError] = useState(''); // État pour gérer les messages d'erreur
-  const [scrollPosition, setScrollPosition] = useState(0); // État pour la position du scroll
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Indique si l'utilisateur est connecté
+  const [error, setError] = useState(''); // Message d'erreur à afficher en cas de problème
+  const [scrollPosition, setScrollPosition] = useState(0); // Position actuelle du défilement vertical
 
-  // États pour les menus déroulants
-  const [race, setRace] = useState(''); // État pour la race
-  const [classe, setClasse] = useState(''); // État pour la classe
-  const [rang, setRang] = useState(''); // État pour le rang
-  const [divitee, setDivitee] = useState(''); // État pour la divinité
+  // États pour les champs de l'inscription (menu déroulant)
+  const [race, setRace] = useState(''); // Sélection de la race
+  const [classe, setClasse] = useState(''); // Sélection de la classe
+  const [rang, setRang] = useState(''); // Sélection du rang
+  const [divitee, setDivitee] = useState(''); // Sélection de la divinité
 
-  // Fonction pour gérer les choix entre login/inscription
+  // Modifie le choix d'authentification entre connexion et inscription
   const handleAuthChoice = (choice) => {
-    setAuthChoice(choice); // Change le choix entre login et inscription
-    setError(''); // Réinitialise les erreurs
+    setAuthChoice(choice); // Met à jour l'état de choix
+    setError(''); // Réinitialise les messages d'erreur
   };
 
-  // Fonction pour envoyer l'inscription au serveur
+  // Envoie les données d'inscription au serveur
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Empêche le comportement par défaut du formulaire
-    setError(''); // Réinitialise les erreurs
+    e.preventDefault(); // Empêche le rechargement de la page
+    setError(''); // Réinitialise les messages d'erreur
     try {
-      // Envoie les données d'inscription au serveur
+      // Requête POST pour envoyer les informations d'inscription
       await axios.post('http://localhost:3000/api/personnages', {
         nom,
         prenom,
@@ -43,7 +43,8 @@ function App() {
         rang,
         divitée: divitee,
       });
-      // Réinitialise les champs après inscription réussie
+
+      // Réinitialise les champs après une inscription réussie
       setNom('');
       setPrenom('');
       setEmail('');
@@ -53,50 +54,52 @@ function App() {
       setRang('');
       setDivitee('');
     } catch (error) {
-      setError('Erreur lors de l\'ajout du personnage.'); // Gère les erreurs d'inscription
+      setError('Erreur lors de l\'ajout du personnage.'); // Affiche un message d'erreur en cas d'échec
     }
   };
 
-  // Fonction pour gérer la connexion
+  // Envoie les données de connexion au serveur
   const handleLogin = async (e) => {
-    e.preventDefault(); // Empêche le comportement par défaut du formulaire
-    setError(''); // Réinitialise les erreurs
+    e.preventDefault(); // Empêche le rechargement de la page
+    setError(''); // Réinitialise les messages d'erreur
     try {
-      // Envoie les données de connexion au serveur
+      // Requête POST pour envoyer les informations de connexion
       await axios.post('http://localhost:3000/api/login', {
         email,
         mot_de_passe: motDePasse,
       });
-      setIsLoggedIn(true); // Met l'état isLoggedIn à true si la connexion est réussie
+      setIsLoggedIn(true); // Passe l'état de connexion à "vrai" si succès
     } catch (error) {
-      setError('Identifiants incorrects.'); // Affiche une erreur si la connexion échoue
+      setError('Identifiants incorrects.'); // Affiche un message d'erreur si les identifiants sont incorrects
     }
   };
 
+  // Gère le défilement de la page et met à jour l'état de la position de défilement
   useEffect(() => {
-    // Fonction pour gérer le défilement de la page (scroll)
     const handleWheel = (e) => {
-      const scrollY = e.deltaY; // Récupère la valeur du défilement
-      setScrollPosition((prevPosition) => Math.max(prevPosition + scrollY / 50, 0)); // Met à jour la position du scroll
+      const scrollY = e.deltaY; // Obtient la valeur du défilement
+      setScrollPosition((prevPosition) => Math.max(prevPosition + scrollY / 50, 0)); // Met à jour la position
     };
 
-    window.addEventListener('wheel', handleWheel); // Écoute l'événement de scroll
+    // Ajoute un écouteur pour l'événement de défilement
+    window.addEventListener('wheel', handleWheel);
     return () => {
-      window.removeEventListener('wheel', handleWheel); // Nettoie l'événement lorsque le composant est démonté
+      // Nettoie l'écouteur lors du démontage du composant
+      window.removeEventListener('wheel', handleWheel);
     };
   }, []);
 
   return (
     <div className="App">
-      {/* Affiche le contenu après connexion */}
+      {/* Contenu affiché si l'utilisateur est connecté */}
       {isLoggedIn ? (
         <>
           <header className="App-header">
             <h1>Bienvenue !</h1>
-            {error && <p style={{ color: 'red' }}>{error}</p>} {/* Affiche les erreurs */}
+            {error && <p style={{ color: 'red' }}>{error}</p>} {/* Affiche les messages d'erreur */}
           </header>
           <section className="App-content">
-            {/* Section avec les cartes flottantes */}
+            {/* Section contenant des cartes flottantes animées */}
             <div
               className="floating-card-container"
               style={{
@@ -110,7 +113,7 @@ function App() {
                 transformStyle: 'preserve-3d',
               }}
             >
-              {/* Génère des cartes flottantes avec une position basée sur la scrollPosition */}
+              {/* Génère des cartes flottantes à gauche et à droite */}
               {[...Array(6)].map((_, index) => (
                 <FloatingCard
                   key={index}
@@ -143,15 +146,16 @@ function App() {
           </section>
         </>
       ) : (
-        // Affiche le formulaire de connexion/inscription
+        // Contenu affiché pour la connexion/inscription
         <header className="App-header">
           <h1>{authChoice === 'login' ? 'Connexion' : 'Inscription'}</h1>
           <div>
-            {/* Boutons pour choisir entre connexion et inscription */}
+            {/* Boutons pour basculer entre les modes connexion et inscription */}
             <button onClick={() => handleAuthChoice('login')}>Connexion</button>
             <button onClick={() => handleAuthChoice('register')}>Inscription</button>
           </div>
           <form onSubmit={authChoice === 'login' ? handleLogin : handleSubmit}>
+            {/* Champs pour l'email et le mot de passe */}
             <input
               id="email"
               type="email"
@@ -169,9 +173,25 @@ function App() {
               required
             />
 
-            {/* Menus déroulants pour l'inscription uniquement */}
+            {/* Champs supplémentaires pour l'inscription */}
             {authChoice === 'register' && (
               <>
+                <input
+                  id="Nom"
+                  type="text"
+                  placeholder="Nom"
+                  value={nom}
+                  onChange={(e) => setNom(e.target.value)}
+                  required
+                />
+                <input
+                  id="Prénom"
+                  type="text"
+                  placeholder="Prénom"
+                  value={prenom}
+                  onChange={(e) => setPrenom(e.target.value)}
+                  required
+                />
                 <select value={race} onChange={(e) => setRace(e.target.value)} required>
                   <option value="">Choisir une race</option>
                   <option value="1">Race 1</option>
